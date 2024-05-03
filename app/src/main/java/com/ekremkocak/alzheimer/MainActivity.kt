@@ -1,13 +1,17 @@
 package com.ekremkocak.alzheimer
 
+import android.Manifest
+import android.content.Intent
 import android.os.Bundle
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.ekremkocak.alzheimer.databinding.ActivityMainBinding
+import com.ekremkocak.alzheimer.service.LocationTrackingService
 
 class MainActivity : AppCompatActivity() {
 
@@ -31,5 +35,19 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+            ),
+            0
+        )
+
+        Intent(applicationContext, LocationTrackingService::class.java).apply {
+            action = LocationTrackingService.ACTION_START
+            startService(this)
+        }
     }
 }
