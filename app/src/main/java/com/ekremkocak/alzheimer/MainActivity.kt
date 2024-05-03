@@ -10,8 +10,15 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.ekremkocak.alzheimer.databinding.ActivityMainBinding
 import com.ekremkocak.alzheimer.service.LocationTrackingService
+import com.ekremkocak.alzheimer.worker.LocationTrackingWorker
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
@@ -49,5 +56,19 @@ class MainActivity : AppCompatActivity() {
             action = LocationTrackingService.ACTION_START
             startService(this)
         }
+
+
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val workRequest = PeriodicWorkRequestBuilder<LocationTrackingWorker>(
+            1, // Tekrarlanacak aralık (örneğin, 15 dakika)
+            TimeUnit.MINUTES // Tekrarlanacak aralığın zaman birimi
+        )
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(this).enqueue(workRequest)
     }
 }

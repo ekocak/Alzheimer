@@ -16,13 +16,20 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.ekremkocak.alzheimer.MainActivity
 import com.ekremkocak.alzheimer.R
+import com.ekremkocak.alzheimer.data.model.LocationEntity
+import com.ekremkocak.alzheimer.data.room.AppDatabase
 import com.google.android.gms.location.*
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class LocationTrackingService : Service() {
 
+    @Inject
+    lateinit var appDatabase: AppDatabase
     private lateinit var notificationManager: NotificationManager
     private lateinit var notificationBuilder: NotificationCompat.Builder
     private val shouldUseGPS: Boolean = true
@@ -30,20 +37,34 @@ class LocationTrackingService : Service() {
     private val shouldUsePassive: Boolean = true
     private lateinit var locationManager: LocationManager
     private var lastKnownLocation: Location? = null
-    private val minTimeBetweenUpdates: Long =100.toLong()
-    //private val minTimeBetweenUpdates: Long = 5 /** 60*/ * 1000.toLong()
+    //private val minTimeBetweenUpdates: Long =100.toLong()
+    private val minTimeBetweenUpdates: Long = 5 * 60 * 1000.toLong()
     private val minDistanceBetweenUpdates: Float = 100f
     private var isListening = false
         private set
 
 
+    @SuppressLint("SuspiciousIndentation")
     private val listener = LocationListener { location ->
         Location(location).let { currentLocation ->
             CoroutineScope(Dispatchers.IO).launch {
                 if(lastKnownLocation == null || isDistanceGreaterThan(lastKnownLocation!!, currentLocation, -1f))
                 lastKnownLocation = currentLocation
                 updateNotification(currentLocation.time.toString())
+                saveLocationToDatabase(location)
             }
+        }
+    }
+    private fun saveLocationToDatabase(location: Location) {
+        // Veritabanına konumu kaydet
+        CoroutineScope(Dispatchers.IO).launch {
+            val locationDao = appDatabase.locationDao()
+            val locationEntity = LocationEntity(
+                latitude = location.latitude,
+                longitude = location.longitude,
+                timestamp = System.currentTimeMillis()
+            )
+            locationDao.insert(locationEntity)
         }
     }
     override fun onBind(intent: Intent?): IBinder? {
@@ -110,6 +131,7 @@ class LocationTrackingService : Service() {
     }
 
     private fun stop() {
+        stopLocationUpdates()
         stopSelf()
     }
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
