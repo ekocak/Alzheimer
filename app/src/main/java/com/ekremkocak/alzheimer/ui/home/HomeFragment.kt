@@ -1,5 +1,6 @@
 package com.ekremkocak.alzheimer.ui.home
 
+
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,11 +10,13 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.ekremkocak.alzheimer.MainActivity
 import com.ekremkocak.alzheimer.R
 import com.ekremkocak.alzheimer.data.model.LocationEntity
 import com.ekremkocak.alzheimer.data.sealed.FlowState
 import com.ekremkocak.alzheimer.databinding.FragmentHomeBinding
 import com.ekremkocak.alzheimer.ui.bottomsheet.AddressBottomSheetFragment
+import com.ekremkocak.alzheimer.util.isLocationServiceRunning
 import com.ekremkocak.alzheimer.viewmodel.home.HomeViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -56,7 +59,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         setupMap()
         viewModel.fetchLocations()
         observeLocations()
-
         initListeners()
     }
 
@@ -64,6 +66,19 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         binding.buttonDeleteMarkers.setOnClickListener {
             viewModel.clearMarks()
         }
+
+        binding.buttonToggleService.setOnClickListener {
+            updateButtonState()
+            val mainActivity = requireActivity() as MainActivity
+            if (requireContext().isLocationServiceRunning()) {
+                mainActivity.stopLocationService()
+            } else {
+                mainActivity.startLocationService()
+            }
+        }
+    }
+    private fun updateButtonState(){
+        binding.buttonToggleService.text = if (!requireContext().isLocationServiceRunning()) getString(R.string.stop_location_track) else getString(R.string.start_location_track)
     }
 
     private fun setupMap(){
@@ -134,11 +149,9 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             false
         }
 
-        googleMap.setOnInfoWindowClickListener {
-            val position = it.position
-            val latitude = position.latitude
-            val longitude = position.longitude
-            viewModel.getAddressFromGeocoder(latitude,longitude)
+        googleMap.setOnInfoWindowClickListener { marker ->
+            val position = marker.position
+            viewModel.getAddressFromGeocoder(position.latitude, position.longitude)
         }
     }
     private fun drawMarkersOnMap() {
@@ -168,7 +181,5 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         super.onDestroyView()
         _binding = null
     }
-
-
 
 }

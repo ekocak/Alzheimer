@@ -1,6 +1,8 @@
 package com.ekremkocak.alzheimer
 
 import android.Manifest
+import android.app.ActivityManager
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -17,6 +19,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.ekremkocak.alzheimer.databinding.ActivityMainBinding
 import com.ekremkocak.alzheimer.service.LocationTrackingService
+import com.ekremkocak.alzheimer.util.isLocationServiceRunning
 import com.ekremkocak.alzheimer.worker.LocationTrackingWorker
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.TimeUnit
@@ -47,6 +50,27 @@ class MainActivity : AppCompatActivity() {
 
 
 
+
+
+
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val workRequest = PeriodicWorkRequestBuilder<LocationTrackingWorker>(
+            15, // Tekrarlanacak aralık (örneğin, 15 dakika)
+            TimeUnit.MINUTES // Tekrarlanacak aralığın zaman birimi
+        )
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(this).enqueue(workRequest)
+
+        if (!isLocationServiceRunning())
+            startLocationService()
+    }
+
+    fun startLocationService() {
         Intent(applicationContext, LocationTrackingService::class.java).apply {
             action = LocationTrackingService.ACTION_START
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -56,19 +80,12 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
+    }
 
-
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
-
-        val workRequest = PeriodicWorkRequestBuilder<LocationTrackingWorker>(
-            1, // Tekrarlanacak aralık (örneğin, 15 dakika)
-            TimeUnit.MINUTES // Tekrarlanacak aralığın zaman birimi
-        )
-            .setConstraints(constraints)
-            .build()
-
-        WorkManager.getInstance(this).enqueue(workRequest)
+    fun stopLocationService() {
+        val serviceIntent = Intent(this, LocationTrackingService::class.java).apply {
+            action = LocationTrackingService.ACTION_STOP
+        }
+        startService(serviceIntent)
     }
 }

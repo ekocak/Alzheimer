@@ -43,7 +43,7 @@ class LocationTrackingService : Service() {
     private lateinit var locationManager: LocationManager
     private var lastKnownLocation: Location? = null
     private val minTimeBetweenUpdates: Long = 5 * 60 * 1000.toLong()
-    private val minDistanceBetweenUpdates: Float = 10f
+    private val minDistanceBetweenUpdates: Float = 100f
     private var isListening = false
         private set
 
