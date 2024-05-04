@@ -18,12 +18,14 @@ import com.ekremkocak.alzheimer.MainActivity
 import com.ekremkocak.alzheimer.R
 import com.ekremkocak.alzheimer.data.model.LocationEntity
 import com.ekremkocak.alzheimer.data.room.AppDatabase
+import com.ekremkocak.alzheimer.util.Constants.MIN_RANGE_CHANGE
 import com.google.android.gms.location.*
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class LocationTrackingService : Service() {
@@ -37,7 +39,6 @@ class LocationTrackingService : Service() {
     private val shouldUsePassive: Boolean = true
     private lateinit var locationManager: LocationManager
     private var lastKnownLocation: Location? = null
-    //private val minTimeBetweenUpdates: Long =100.toLong()
     private val minTimeBetweenUpdates: Long = 5 * 60 * 1000.toLong()
     private val minDistanceBetweenUpdates: Float = 100f
     private var isListening = false
@@ -48,7 +49,7 @@ class LocationTrackingService : Service() {
     private val listener = LocationListener { location ->
         Location(location).let { currentLocation ->
             CoroutineScope(Dispatchers.IO).launch {
-                if(lastKnownLocation == null || isDistanceGreaterThan(lastKnownLocation!!, currentLocation, -1f))
+                if(lastKnownLocation == null || isDistanceGreaterThan(lastKnownLocation!!, currentLocation, MIN_RANGE_CHANGE))
                 lastKnownLocation = currentLocation
                 updateNotification(currentLocation.time.toString())
                 saveLocationToDatabase(location)
@@ -56,7 +57,6 @@ class LocationTrackingService : Service() {
         }
     }
     private fun saveLocationToDatabase(location: Location) {
-        // Veritabanına konumu kaydet
         CoroutineScope(Dispatchers.IO).launch {
             val locationDao = appDatabase.locationDao()
             val locationEntity = LocationEntity(
@@ -94,15 +94,12 @@ class LocationTrackingService : Service() {
     private fun startListening(context: Context) {
         initManagerAndUpdateLastKnownLocation(context)
         if (!isListening) {
-            // Listen for GPS Updates
             if (shouldUseGPS) {
                 registerForLocationUpdates(LocationManager.GPS_PROVIDER)
             }
-            // Listen for Network Updates
             if (shouldUseNetwork) {
                 registerForLocationUpdates(LocationManager.NETWORK_PROVIDER)
             }
-            // Listen for Passive Updates
             if (shouldUseNetwork) {
                 registerForLocationUpdates(LocationManager.PASSIVE_PROVIDER)
             }

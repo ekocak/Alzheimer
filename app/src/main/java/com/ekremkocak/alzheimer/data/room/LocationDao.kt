@@ -16,6 +16,6 @@ abstract class LocationDao : BaseDao<LocationEntity> {
     )
     abstract fun getSavedLocations(
         limit: Int
-    ): List<LocationEntity>
+    ): Flow<List<LocationEntity>>
 
 }
