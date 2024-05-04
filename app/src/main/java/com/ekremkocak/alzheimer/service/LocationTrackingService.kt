@@ -8,6 +8,8 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -18,6 +20,7 @@ import com.ekremkocak.alzheimer.MainActivity
 import com.ekremkocak.alzheimer.R
 import com.ekremkocak.alzheimer.data.model.LocationEntity
 import com.ekremkocak.alzheimer.data.room.AppDatabase
+import com.ekremkocak.alzheimer.util.Constants
 import com.ekremkocak.alzheimer.util.Constants.MIN_RANGE_CHANGE
 import com.google.android.gms.location.*
 import dagger.hilt.android.AndroidEntryPoint
@@ -40,7 +43,7 @@ class LocationTrackingService : Service() {
     private lateinit var locationManager: LocationManager
     private var lastKnownLocation: Location? = null
     private val minTimeBetweenUpdates: Long = 5 * 60 * 1000.toLong()
-    private val minDistanceBetweenUpdates: Float = 100f
+    private val minDistanceBetweenUpdates: Float = 10f
     private var isListening = false
         private set
 
@@ -106,6 +109,17 @@ class LocationTrackingService : Service() {
             isListening = true
         }
     }
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val serviceChannel = NotificationChannel(
+                Constants.CHANNEL_ID,
+                "Location Service Channel",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(serviceChannel)
+        }
+    }
 
     @SuppressLint("MissingPermission")
     private fun initManagerAndUpdateLastKnownLocation(context: Context) {
@@ -149,7 +163,7 @@ class LocationTrackingService : Service() {
 
     @SuppressLint("ForegroundServiceType")
     private fun startForegroundService() {
-        val channelId = "location_tracking_channel"
+
         notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -158,26 +172,25 @@ class LocationTrackingService : Service() {
             this,
             0,
             notificationIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_MUTABLE
         )
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                "Location Tracking Service",
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-            notificationManager.createNotificationChannel(channel)
-        }
+        createNotificationChannel()
 
-        notificationBuilder = NotificationCompat.Builder(this, channelId)
+        notificationBuilder = NotificationCompat.Builder(this, Constants.CHANNEL_ID)
             .setContentTitle("Location Tracking")
             .setContentText("Tracking your location...")
             .setSmallIcon(R.drawable.ic_launcher_background)
             .setContentIntent(pendingIntent)
 
 
-        startForeground(1, notificationBuilder.build())
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            startForeground(1, notificationBuilder.build())
+        } else {
+            startForeground(1, notificationBuilder.build(),
+                FOREGROUND_SERVICE_TYPE_LOCATION)
+        }
+
     }
 
     private fun updateNotification(contentText: String) {
