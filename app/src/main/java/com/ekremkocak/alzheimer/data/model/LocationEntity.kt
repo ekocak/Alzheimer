@@ -16,5 +16,6 @@ data class LocationEntity(
     val id: Long = 0,
     val latitude: Double,
     val longitude: Double,
-    val timestamp: Long
+    val timestamp: Long,
+    val isDeleted: Boolean = false
 )

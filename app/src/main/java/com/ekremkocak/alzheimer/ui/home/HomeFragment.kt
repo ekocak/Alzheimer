@@ -56,6 +56,14 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         setupMap()
         viewModel.fetchLocations()
         observeLocations()
+
+        initListeners()
+    }
+
+    private fun initListeners() {
+        binding.buttonDeleteMarkers.setOnClickListener {
+            viewModel.clearMarks()
+        }
     }
 
     private fun setupMap(){
@@ -95,8 +103,11 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             }
         }
     }
+
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
+
+        googleMap.isMyLocationEnabled = true
 
         setMarkerClickListener()
 
@@ -109,10 +120,13 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             builder.include(latLng)
         }
 
-        val bounds = builder.build()
-        val padding = resources.getDimensionPixelSize(R.dimen.map_padding)
-        val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, padding)
-        googleMap.animateCamera(cameraUpdate)
+        if (markerCoordinates.isNotEmpty()){
+            val bounds = builder.build()
+            val padding = resources.getDimensionPixelSize(R.dimen.map_padding)
+            val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, padding)
+            googleMap.animateCamera(cameraUpdate)
+        }
+
     }
 
     private fun setMarkerClickListener() {
@@ -149,8 +163,12 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             }
         }
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
+
+
+
 }

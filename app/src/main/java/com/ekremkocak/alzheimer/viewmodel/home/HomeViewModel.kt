@@ -8,6 +8,8 @@ import com.ekremkocak.alzheimer.data.repository.LocationRepository
 import com.ekremkocak.alzheimer.data.sealed.FlowState
 import com.ekremkocak.alzheimer.util.GeocoderHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -27,7 +29,7 @@ class HomeViewModel @Inject constructor(
 
 
     fun fetchLocations() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _locationsState.value = FlowState.Loading
             try {
                 locationRepository.getLocations().collect(){ locations ->
@@ -39,6 +41,14 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun clearMarks(){
+        val exceptionHandler = CoroutineExceptionHandler {_, exception ->
+            println("CoroutineExceptionHandler caught $exception")
+        }
+        viewModelScope.launch(exceptionHandler + Dispatchers.IO) {
+            locationRepository.softDeleteMarks()
+        }
+    }
 
 
     fun getAddressFromGeocoder( lat: Double, lng: Double) {

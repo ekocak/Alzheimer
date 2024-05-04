@@ -8,5 +8,9 @@ class LocationRepository @Inject constructor(
 ) {
     fun getLocations() =
         locationDao.getSavedLocations(100)
+    suspend fun softDeleteMarks() {
+        locationDao.softDeleteAllData()
+    }
+
 
 }

@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 abstract class LocationDao : BaseDao<LocationEntity> {
     @Query(
         """
-        SELECT locations.* FROM locations
+        SELECT locations.* FROM locations where isDeleted = 0
         LIMIT :limit
         """
     )
@@ -18,4 +18,6 @@ abstract class LocationDao : BaseDao<LocationEntity> {
         limit: Int
     ): Flow<List<LocationEntity>>
 
+    @Query("""UPDATE locations SET isDeleted = 1""")
+     abstract fun softDeleteAllData()
 }
