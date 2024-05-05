@@ -21,10 +21,22 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginVertical="@dimen/clear_button_margin"
         app:cornerRadius="10dp"
+        android:elevation="5dp"
         android:layout_marginHorizontal="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-
+    <com.ekremkocak.alzheimer.ui.customview.TransparentTextTextView
+        android:id="@+id/textHello"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:gravity="center"
+        android:text="@string/hello"
+        android:textSize="100sp"
+        android:background="@android:color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
