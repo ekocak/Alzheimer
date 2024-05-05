@@ -16,6 +16,7 @@ import com.ekremkocak.alzheimer.data.model.LocationEntity
 import com.ekremkocak.alzheimer.data.sealed.FlowState
 import com.ekremkocak.alzheimer.databinding.FragmentHomeBinding
 import com.ekremkocak.alzheimer.ui.bottomsheet.AddressBottomSheetFragment
+import com.ekremkocak.alzheimer.util.Constants
 import com.ekremkocak.alzheimer.viewmodel.home.HomeViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -87,7 +88,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                         }
                         is FlowState.Success -> {
                             locations = state.data
-                            if (::googleMap.isInitialized) {
+                            if (::googleMap.isInitialized && isFirstLoad) {
                                 drawMarkersOnMap()
                             }
                         }
@@ -118,8 +119,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
         setMarkerClickListener()
 
-
-        startMapAnimation()
+        locations?.let { drawMarkersOnMap() }
     }
     private fun centerMapWithMarkers(markerCoordinates: List<LatLng>) {
         val builder = LatLngBounds.Builder()
@@ -132,7 +132,11 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             val bounds = builder.build()
             val padding = resources.getDimensionPixelSize(R.dimen.map_padding)
             val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, padding)
-            googleMap.animateCamera(cameraUpdate)
+            googleMap.animateCamera(cameraUpdate,Constants.CAMERA_SLIDE_EFFECT_DURATION,null)
+        }
+        CoroutineScope(Dispatchers.Main).launch {
+            delay(Constants.CAMERA_SLIDE_EFFECT_DURATION.toLong())
+            binding.textHello.visibility = View.GONE
         }
 
     }
@@ -167,21 +171,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 centerMapWithMarkers(markerCoordinates)
                 isFirstLoad = false
             }
+        }else{
+            binding.textHello.visibility = View.GONE
         }
-    }
-    private fun startMapAnimation() {
-        job = CoroutineScope(Dispatchers.Main).launch {
-            try {
-                repeat(30) {
-                    delay(100)
-                    currentLocation = LatLng(currentLocation.latitude, currentLocation.longitude + 1f)
-                    googleMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
-                }
-            } finally {
-                binding.textHello.visibility = View.GONE
-                locations?.let { drawMarkersOnMap() }
-            }
-        }
+
     }
 
     override fun onDestroyView() {
