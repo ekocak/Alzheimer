@@ -22,6 +22,7 @@ import com.ekremkocak.alzheimer.data.model.LocationEntity
 import com.ekremkocak.alzheimer.data.room.AppDatabase
 import com.ekremkocak.alzheimer.util.Constants
 import com.ekremkocak.alzheimer.util.Constants.MIN_RANGE_CHANGE
+import com.ekremkocak.alzheimer.util.Utils
 import com.google.android.gms.location.*
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -54,12 +55,12 @@ class LocationTrackingService : Service() {
             CoroutineScope(Dispatchers.IO).launch {
                 if(lastKnownLocation == null || isDistanceGreaterThan(lastKnownLocation!!, currentLocation, MIN_RANGE_CHANGE))
                 lastKnownLocation = currentLocation
-                updateNotification(currentLocation.time.toString())
+                updateNotification(getString(R.string.last_update_date) + " - " + Utils.convertTimeToDateString(currentLocation.time))
                 saveLocationToDatabase(location)
             }
         }
     }
-    private fun saveLocationToDatabase(location: Location) {
+    private fun saveLocationToDatabase(location: Location) {//i will use flow so view auto update !!
         CoroutineScope(Dispatchers.IO).launch {
             val locationDao = appDatabase.locationDao()
             val locationEntity = LocationEntity(
@@ -178,8 +179,8 @@ class LocationTrackingService : Service() {
         createNotificationChannel()
 
         notificationBuilder = NotificationCompat.Builder(this, Constants.CHANNEL_ID)
-            .setContentTitle("Location Tracking")
-            .setContentText("Tracking your location...")
+            .setContentTitle(getString(R.string.location_Tracking))
+            .setContentText(getString(R.string.tracking_your_location))
             .setSmallIcon(R.drawable.ic_notification)
             .setContentIntent(pendingIntent)
 

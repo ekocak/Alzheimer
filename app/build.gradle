@@ -36,6 +36,7 @@ android {
     }
     buildFeatures {
         viewBinding true
+        dataBinding true
     }
 }
 
@@ -79,6 +80,9 @@ dependencies {
 
 /** Google Maps **/
     implementation 'com.google.android.gms:play-services-maps:18.2.0'
+
+
+    implementation "androidx.fragment:fragment-ktx:1.6.2"
 
 
 }

@@ -11,12 +11,20 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.ekremkocak.alzheimer.databinding.ActivityMainBinding
 import com.ekremkocak.alzheimer.service.LocationTrackingService
+import com.ekremkocak.alzheimer.util.PrefHelper
 import com.ekremkocak.alzheimer.util.isLocationServiceRunning
+
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
+    @Inject
+    lateinit var prefHelper: PrefHelper
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,15 +40,18 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications
+                R.id.navigation_home, R.id.navigation_notifications
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
+        CoroutineScope(Dispatchers.IO).launch {
 
-        if (!isLocationServiceRunning())
-            startLocationService()
+            if (!isLocationServiceRunning() && prefHelper.isTrackingEnabled())
+                startLocationService()
+        }
+
     }
 
     fun startLocationService() {
