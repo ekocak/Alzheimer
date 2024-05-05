@@ -7,10 +7,6 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import com.ekremkocak.alzheimer.service.LocationTrackingService
 
-fun Context.hasBackgroundLocationPermission() =
-    (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
-            ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-            == PackageManager.PERMISSION_GRANTED)
 
 fun Context.isLocationServiceRunning(): Boolean {
     val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
