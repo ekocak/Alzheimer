@@ -1,28 +1,17 @@
 package com.ekremkocak.alzheimer.service
 
-import android.annotation.SuppressLint
-import android.app.Notification
-import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
-import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
 import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
-import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import com.ekremkocak.alzheimer.MainActivity
 import com.ekremkocak.alzheimer.R
 import com.ekremkocak.alzheimer.data.model.LocationEntity
 import com.ekremkocak.alzheimer.data.room.AppDatabase
 import com.ekremkocak.alzheimer.util.Constants
 import com.ekremkocak.alzheimer.util.Constants.MIN_RANGE_CHANGE
-import com.ekremkocak.alzheimer.util.Utils
 import com.google.android.gms.location.*
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -63,8 +52,8 @@ class LocationTrackingService : Service() {
     }
 
     private fun start(){
-        val notification = NotificationCompat.Builder(this, "location")
-            .setContentTitle("getString(R.string.location_Tracking)")
+        val notification = NotificationCompat.Builder(this, Constants.CHANNEL_ID)
+            .setContentTitle(getString(R.string.location_Tracking))
             .setContentText("Location: null")
             .setSmallIcon(R.drawable.ic_launcher_background)
             .setOngoing(true)

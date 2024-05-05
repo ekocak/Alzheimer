@@ -12,6 +12,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.ekremkocak.alzheimer.databinding.ActivityMainBinding
 import com.ekremkocak.alzheimer.service.LocationTrackingService
 import com.ekremkocak.alzheimer.util.PrefHelper
+import com.ekremkocak.alzheimer.util.hasNotificationPermission
 import com.ekremkocak.alzheimer.util.isLocationServiceRunning
 
 import dagger.hilt.android.AndroidEntryPoint
@@ -57,19 +58,20 @@ class MainActivity : AppCompatActivity() {
     fun startLocationService() {
         Intent(applicationContext, LocationTrackingService::class.java).apply {
             action = LocationTrackingService.ACTION_START
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (hasNotificationPermission())
                 startService(this)
-            }else{
-                startService(this)
-            }
+
 
         }
     }
 
     fun stopLocationService() {
-        val serviceIntent = Intent(this, LocationTrackingService::class.java).apply {
-            action = LocationTrackingService.ACTION_STOP
+        if (isLocationServiceRunning()){
+            val serviceIntent = Intent(this, LocationTrackingService::class.java).apply {
+                action = LocationTrackingService.ACTION_STOP
+            }
+            startService(serviceIntent)
         }
-        startService(serviceIntent)
+
     }
 }
