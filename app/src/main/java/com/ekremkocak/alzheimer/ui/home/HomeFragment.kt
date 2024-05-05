@@ -16,6 +16,7 @@ import com.ekremkocak.alzheimer.data.model.LocationEntity
 import com.ekremkocak.alzheimer.data.sealed.FlowState
 import com.ekremkocak.alzheimer.databinding.FragmentHomeBinding
 import com.ekremkocak.alzheimer.ui.bottomsheet.AddressBottomSheetFragment
+import com.ekremkocak.alzheimer.util.Constants
 import com.ekremkocak.alzheimer.viewmodel.home.HomeViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -25,6 +26,10 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -33,7 +38,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private val viewModel: HomeViewModel by viewModels()
     private var _binding: FragmentHomeBinding? = null
     private var locations: List<LocationEntity>? = null
-
+    private var currentLocation = LatLng(0.0, 0.0)
+    private var job: Job? = null
     private val binding get() = _binding!!
 
     private lateinit var googleMap: GoogleMap
@@ -82,7 +88,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                         }
                         is FlowState.Success -> {
                             locations = state.data
-                            if (::googleMap.isInitialized) {
+                            if (::googleMap.isInitialized && isFirstLoad) {
                                 drawMarkersOnMap()
                             }
                         }
@@ -126,7 +132,11 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             val bounds = builder.build()
             val padding = resources.getDimensionPixelSize(R.dimen.map_padding)
             val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, padding)
-            googleMap.animateCamera(cameraUpdate)
+            googleMap.animateCamera(cameraUpdate,Constants.CAMERA_SLIDE_EFFECT_DURATION,null)
+        }
+        CoroutineScope(Dispatchers.Main).launch {
+            delay(Constants.CAMERA_SLIDE_EFFECT_DURATION.toLong())
+            binding.textHello.visibility = View.GONE
         }
 
     }
@@ -161,7 +171,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 centerMapWithMarkers(markerCoordinates)
                 isFirstLoad = false
             }
+        }else{
+            binding.textHello.visibility = View.GONE
         }
+
     }
 
     override fun onDestroyView() {
@@ -169,4 +182,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         _binding = null
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        job?.cancel()
+    }
 }

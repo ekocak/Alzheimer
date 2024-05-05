@@ -9,4 +9,7 @@
     <string name="last_update_date">Last Update Date: </string>
     <string name="location_Tracking">Location Tracking</string>
     <string name="tracking_your_location">Tracking your location...</string>
+    <string name="location">Location</string>
+    <string name="gps_disabled">"GPS is disabled"</string>
+    <string name="hello">Hello</string>
 </resources>
