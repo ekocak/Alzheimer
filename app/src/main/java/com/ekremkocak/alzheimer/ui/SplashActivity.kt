@@ -6,49 +6,24 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.ekremkocak.alzheimer.MainActivity
 import com.ekremkocak.alzheimer.databinding.ActivitySplashBinding
 
 class SplashActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySplashBinding
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission(),
-    ) { isGranted: Boolean ->
-        requestLocationPermission()
-    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        requestNotificationPermission()
+        requestAllPermission()
     }
 
-    private fun requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    android.Manifest.permission.POST_NOTIFICATIONS
-                ) !=
-                PackageManager.PERMISSION_GRANTED
-            ) {
-                requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-            }
-            else{
-                requestLocationPermission()
-            }
-        }
-        else{
-            requestLocationPermission()
-        }
-    }
-
-    private fun requestLocationPermission() {
+    private fun requestAllPermission() {
         val permissionsToRequest = mutableListOf<String>()
 
         val permissionFineLocationApproved = ActivityCompat.checkSelfPermission(
@@ -69,6 +44,15 @@ class SplashActivity : AppCompatActivity() {
             permissionsToRequest.add(Manifest.permission.ACCESS_COARSE_LOCATION)
         }
 
+        val permissionPostNotificationsApproved = ((Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) || ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED)
+
+        if (!permissionPostNotificationsApproved) {
+            permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val permissionBackgroundLocationApproved = ActivityCompat.checkSelfPermission(
                 this,
@@ -84,7 +68,7 @@ class SplashActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(
                 this,
                 permissionsToRequest.toTypedArray(),
-                LOCATION_PERMISSION_REQUEST_CODE
+                ALL_PERMISSION_REQUEST_CODE
             )
         } else {
             navigateToMainActivity()
@@ -95,14 +79,7 @@ class SplashActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         when (requestCode) {
-            NOTIFICATION_PERMISSION_REQUEST_CODE -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    requestLocationPermission()
-                } else {
-                    requestLocationPermission()
-                }
-            }
-            LOCATION_PERMISSION_REQUEST_CODE -> {
+            ALL_PERMISSION_REQUEST_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     navigateToMainActivity()
                 } else {
@@ -112,7 +89,6 @@ class SplashActivity : AppCompatActivity() {
                     }else{
 
                     }
-
                 }
             }
         }
@@ -125,6 +101,6 @@ class SplashActivity : AppCompatActivity() {
 
     companion object {
         private const val NOTIFICATION_PERMISSION_REQUEST_CODE = 1001
-        private const val LOCATION_PERMISSION_REQUEST_CODE = 1002
+        private const val ALL_PERMISSION_REQUEST_CODE = 1002
     }
 }

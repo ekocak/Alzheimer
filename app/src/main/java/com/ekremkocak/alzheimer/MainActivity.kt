@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
         Intent(applicationContext, LocationTrackingService::class.java).apply {
             action = LocationTrackingService.ACTION_START
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(this)
+                startService(this)
             }else{
                 startService(this)
             }
