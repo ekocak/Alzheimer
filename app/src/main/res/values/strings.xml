@@ -12,4 +12,6 @@
     <string name="location">Location</string>
     <string name="gps_disabled">"GPS is disabled"</string>
     <string name="hello">Hello</string>
+    <string name="required_notifiction_permission">Required Notification Permission</string>
+    <string name="required_location_permission">Location Permission Needed</string>
 </resources>

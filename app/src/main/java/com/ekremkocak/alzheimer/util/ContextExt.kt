@@ -5,6 +5,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.ekremkocak.alzheimer.service.LocationTrackingService
 fun Context.hasLocationPermissions(): Boolean {
@@ -37,6 +38,9 @@ fun Context.hasLocationPermissions(): Boolean {
                 ) == PackageManager.PERMISSION_GRANTED)
     }
 }
+
+fun Context.hasNotificationPermission(): Boolean =
+    NotificationManagerCompat.from(this).areNotificationsEnabled()
 
 fun Context.isLocationServiceRunning(): Boolean {
     val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
