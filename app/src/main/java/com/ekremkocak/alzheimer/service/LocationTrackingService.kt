@@ -180,7 +180,7 @@ class LocationTrackingService : Service() {
         notificationBuilder = NotificationCompat.Builder(this, Constants.CHANNEL_ID)
             .setContentTitle("Location Tracking")
             .setContentText("Tracking your location...")
-            .setSmallIcon(R.drawable.ic_launcher_background)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentIntent(pendingIntent)
 
 

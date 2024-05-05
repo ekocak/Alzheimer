@@ -71,7 +71,13 @@ class SplashActivity : AppCompatActivity() {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     navigateToMainActivity()
                 } else {
-                    finish()
+                    val showRationale = shouldShowRequestPermissionRationale(permissions[0])
+                    if (!showRationale) {
+                        Log.d("Permission", "Kullanıcı bir daha sorma seçeneğini seçti.")
+                    }else{
+
+                    }
+
                 }
             }
         }
