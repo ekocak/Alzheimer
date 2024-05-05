@@ -54,7 +54,8 @@ class LocationTrackingService : Service() {
         Location(location).let { currentLocation ->
             CoroutineScope(Dispatchers.IO).launch {
                 if(lastKnownLocation == null || isDistanceGreaterThan(lastKnownLocation!!, currentLocation, MIN_RANGE_CHANGE))
-                lastKnownLocation = currentLocation
+                    lastKnownLocation = currentLocation
+                //there is not bug for testing not in if bock
                 updateNotification(getString(R.string.last_update_date) + " - " + Utils.convertTimeToDateString(currentLocation.time))
                 saveLocationToDatabase(location)
             }
