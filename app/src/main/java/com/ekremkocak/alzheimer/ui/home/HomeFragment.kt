@@ -25,6 +25,10 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -33,7 +37,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private val viewModel: HomeViewModel by viewModels()
     private var _binding: FragmentHomeBinding? = null
     private var locations: List<LocationEntity>? = null
-
+    private var currentLocation = LatLng(0.0, 0.0)
+    private var job: Job? = null
     private val binding get() = _binding!!
 
     private lateinit var googleMap: GoogleMap
@@ -113,7 +118,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
         setMarkerClickListener()
 
-        locations?.let { drawMarkersOnMap() }
+
+        startMapAnimation()
     }
     private fun centerMapWithMarkers(markerCoordinates: List<LatLng>) {
         val builder = LatLngBounds.Builder()
@@ -163,10 +169,28 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             }
         }
     }
+    private fun startMapAnimation() {
+        job = CoroutineScope(Dispatchers.Main).launch {
+            try {
+                repeat(30) {
+                    delay(100)
+                    currentLocation = LatLng(currentLocation.latitude, currentLocation.longitude + 1f)
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
+                }
+            } finally {
+                binding.textHello.visibility = View.GONE
+                locations?.let { drawMarkersOnMap() }
+            }
+        }
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        job?.cancel()
+    }
 }
