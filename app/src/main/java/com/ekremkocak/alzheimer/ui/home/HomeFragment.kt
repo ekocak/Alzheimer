@@ -185,4 +185,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         super.onDestroy()
         job?.cancel()
     }
+    fun colfilict2(){
+
+    }
 }
