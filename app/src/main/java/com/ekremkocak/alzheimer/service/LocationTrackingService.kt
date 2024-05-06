@@ -59,7 +59,7 @@ class LocationTrackingService : Service() {
             .setOngoing(true)
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        myLocationClient.getLocationUpdates(10L)
+        myLocationClient.getLocationUpdates(30L)
             .catch { e -> e.printStackTrace() }
             .onEach {location ->
                 val lat = location.latitude.toString()
@@ -67,9 +67,10 @@ class LocationTrackingService : Service() {
                 val updateNotification = notification.setContentText("${getString(R.string.location)}: ($lat, $long)")
                 notificationManager?.notify(1, updateNotification.build())
 
-                if(lastKnownLocation == null || isDistanceGreaterThan(lastKnownLocation!!, location,MIN_RANGE_CHANGE))
+                if(lastKnownLocation == null || isDistanceGreaterThan(lastKnownLocation!!, location)){
+                    saveLocationToDatabase(location)
                     lastKnownLocation = location
-                saveLocationToDatabase(location)
+                }
             }
             .launchIn(serviceScope)
 
@@ -92,7 +93,7 @@ class LocationTrackingService : Service() {
             locationDao.insert(locationEntity)
         }
     }
-    private fun isDistanceGreaterThan(location1: Location, location2: Location, distanceThreshold: Float): Boolean {
+    private fun isDistanceGreaterThan(location1: Location, location2: Location): Boolean {
         val results = FloatArray(1)
         Location.distanceBetween(
             location1.latitude,
@@ -101,7 +102,7 @@ class LocationTrackingService : Service() {
             location2.longitude,
             results
         )
-        return results[0] > distanceThreshold
+        return results[0] > MIN_RANGE_CHANGE
     }
     override fun onDestroy() {
         super.onDestroy()

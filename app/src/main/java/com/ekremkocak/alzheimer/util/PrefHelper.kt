@@ -14,7 +14,7 @@ class PrefHelper @Inject constructor(private val sharedPreferences: SharedPrefer
     }
 
     fun isTrackingEnabled() =
-        sharedPreferences.getBoolean(Constants.TRACKING_ENABLED, false)
+        sharedPreferences.getBoolean(Constants.TRACKING_ENABLED, true)
 
 
 }

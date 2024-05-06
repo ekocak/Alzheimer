@@ -38,7 +38,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private val viewModel: HomeViewModel by viewModels()
     private var _binding: FragmentHomeBinding? = null
     private var locations: List<LocationEntity>? = null
-    private var currentLocation = LatLng(0.0, 0.0)
     private var job: Job? = null
     private val binding get() = _binding!!
 
@@ -136,7 +135,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         }
         CoroutineScope(Dispatchers.Main).launch {
             delay(Constants.CAMERA_SLIDE_EFFECT_DURATION.toLong())
-            binding.textHello.visibility = View.GONE
+            _binding?.textHello?.visibility = View.GONE
         }
 
     }
