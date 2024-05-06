@@ -21,22 +21,50 @@ import com.google.android.material.snackbar.Snackbar
 class SplashActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySplashBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        checkAndRequestNotificationPermission()
+        requestNotificationPermission()
     }
-    private fun checkAndRequestNotificationPermission() {
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val permission = Manifest.permission.POST_NOTIFICATIONS
+            when {
+                ContextCompat.checkSelfPermission(
+                    this, permission
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    // Action to take when permission is already granted
+                    checkLocationPermission()
+                }
+
+                shouldShowRequestPermissionRationale(permission) -> {
+                    requestSettingsScreen()
+                }
+
+                else -> {
+                    // Request permission
+                    ActivityCompat.requestPermissions(
+                        this,
+                        arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                        MY_PERMISSIONS_REQUEST_NOTIFICATION
+                    )
+                }
+            }
+        } else {
+            // Device does not support required permission
+            Toast.makeText(this, "No required permission", Toast.LENGTH_LONG).show()
+        }
+    }
+    private fun requestSettingsScreen() {
         if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) {
 
             Snackbar.make(
                 findViewById(android.R.id.content),
                 getString(R.string.required_notifiction_permission),
                 Snackbar.LENGTH_INDEFINITE
-            ).setAction("İzin Ver") {
+            ).setAction("Allow") {
                 // Bildirim iznini açma ekranına yönlendir
                 val intent = Intent().apply {
                     action = "android.settings.APP_NOTIFICATION_SETTINGS"
@@ -204,12 +232,13 @@ class SplashActivity : AppCompatActivity() {
     }
     override fun onResume() {
         super.onResume()
-        checkAndRequestNotificationPermission()
+        requestNotificationPermission()
     }
 
 
     companion object {
         private const val MY_PERMISSIONS_REQUEST_LOCATION = 99
         private const val MY_PERMISSIONS_REQUEST_BACKGROUND_LOCATION = 66
+        private const val MY_PERMISSIONS_REQUEST_NOTIFICATION = 33
     }
 }
