@@ -38,7 +38,11 @@ class SplashActivity : AppCompatActivity() {
                 Snackbar.LENGTH_INDEFINITE
             ).setAction("İzin Ver") {
                 // Bildirim iznini açma ekranına yönlendir
-
+                val intent = Intent().apply {
+                    action = "android.settings.APP_NOTIFICATION_SETTINGS"
+                    putExtra("android.provider.extra.APP_PACKAGE", packageName)
+                }
+                startActivity(intent)
             }.show()
         } else {
             checkLocationPermission()
