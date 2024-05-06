@@ -185,7 +185,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         super.onDestroy()
         job?.cancel()
     }
-    fun confilict1(){
+    fun confilict3(){
 
     }
 }
