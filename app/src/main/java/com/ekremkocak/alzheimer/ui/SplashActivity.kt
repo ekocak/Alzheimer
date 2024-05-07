@@ -54,6 +54,7 @@ class SplashActivity : AppCompatActivity() {
             }
         } else {
             // Device does not support required permission
+            requestLocationPermission()
             Toast.makeText(this, "No required permission", Toast.LENGTH_LONG).show()
         }
     }

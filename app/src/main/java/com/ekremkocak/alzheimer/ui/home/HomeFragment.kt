@@ -87,7 +87,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                         }
                         is FlowState.Success -> {
                             locations = state.data
-                            if (::googleMap.isInitialized && isFirstLoad) {
+                            if (::googleMap.isInitialized) {
                                 drawMarkersOnMap()
                             }
                         }

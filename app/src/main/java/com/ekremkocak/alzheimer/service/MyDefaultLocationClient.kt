@@ -36,8 +36,8 @@ class MyDefaultLocationClient(
                 throw MyLocationClient.AnyException(context.getString(R.string.gps_disabled))
             }
             val request = LocationRequest.Builder(interval)
-                .setMinUpdateDistanceMeters(100f)
-                .setIntervalMillis(5 * 60 * 1000)
+                .setMinUpdateDistanceMeters(1f)
+                .setIntervalMillis(1000)
                 .setWaitForAccurateLocation(true)
                 .build()
             val locationCallback = object : LocationCallback() {
